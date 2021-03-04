@@ -4,6 +4,7 @@ import axios from 'axios';
 import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
 
+//styles
 const berryStyle = {
 	display: 'flex',
 	flexFlow: 'row',
@@ -21,14 +22,18 @@ const berryBodyDetailsStyle = {
 	flexFlow: 'column',
 }
 
+
 function Berry( berry ) {
+	//state
 	let [berryDetails, setBerryDetails] = useState([]);
 	let [berryEffects, setBerryEffect] = useState('');
 	let [berrySprite, setBerrySprite] = useState('');
 	let [berryDetailsShown, setBerryDetailsShown] = useState(false)
 
+	//call an api request on the berry using its name, which will give us the url, and
 	useEffect( () => {
 		axios.get(`https://pokeapi.co/api/v2/berry/${berry.berry.name}`).then(( response ) => {
+			setBerryDetails(() => berryDetails = response.data );
 			axios.get(response.data.item.url).then((response) => {
 				console.log(response.data['effect_entries'][0]['short_effect'], response.data['sprites'].default)
 				setBerryEffect(response.data['effect_entries'][0]['short_effect']);
@@ -40,10 +45,7 @@ function Berry( berry ) {
 	}, [])
 
 	const getBerryDetails = ( berryName ) => {
-		axios.get(`https://pokeapi.co/api/v2/berry/${berryName}`).then(( response ) => {
-			setBerryDetails(() => berryDetails = response.data );
-			console.log(berryDetails)
-		}).then(() => { setBerryDetailsShown(true); console.log(berryDetailsShown)})
+		setBerryDetailsShown(true); console.log(berryDetailsShown);
 	}
 
 
