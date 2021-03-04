@@ -5,6 +5,7 @@ import Transition from "react-transition-group/cjs/Transition";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import StartInfo from './components/StartAlert'
 import Home from "./components/Home";
+import FiltersState from "./context/filtersState";
 
 const duration = 300;
 
@@ -42,19 +43,21 @@ function App() {
     const [inProp, setInProp] = useState(true);
 
     return (
-        <div className="app">
-            <Transition in={inProp} appear={inProp} timeout={500}>
-                {state => (
-                    <div style={{
-                        ...defaultStyle,
-                        ...transitionStyles[state]
-                    }}>
-                        <StartInfo/>
-                        <Home/>
-                    </div>
-                )}
-            </Transition>
-        </div>
+        <FiltersState>
+            <div className="app">
+                <Transition in={inProp} appear={inProp} timeout={500}>
+                    {state => (
+                        <div style={{
+                            ...defaultStyle,
+                            ...transitionStyles[state]
+                        }}>
+                            <StartInfo/>
+                            <Home/>
+                        </div>
+                    )}
+                </Transition>
+            </div>
+        </FiltersState>
     );
 }
 

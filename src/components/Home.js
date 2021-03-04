@@ -1,9 +1,11 @@
 import React, { Component } from "react";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import Button from "react-bootstrap/Button";
+import FiltersContext from "../context/filtersContext";
 import Card from "react-bootstrap/Card";
 import axios from 'axios';
 import Berry from "./Berry";
+import Form from 'react-bootstrap/Form'
 
 //styles
 const berryListStyle = {
@@ -17,9 +19,9 @@ const berryListBodyStyle = {
 	display: 'flex',
 	flexFlow: 'row wrap',
 	alignItems: 'start',
-	width: '80%',
+	width: '60%',
 	height: '100%',
-	marginRight: '2.5%',
+	marginRight: '0.5%',
 	transition: '0.4s ease',
 }
 const berryListBodyStyleOverlay = {
@@ -31,6 +33,7 @@ const berryListBodyStyleOverlay = {
 	marginRight: '2.5%',
 	opacity: '0.25',
 	transition: '0.4s ease',
+	zIndex: 1,
 }
 const berryControlsStyle = {
 	display: 'flex',
@@ -42,14 +45,31 @@ const berryControlsStyle = {
 
 
 function Home() {
+	const filtersContext = useContext(FiltersContext)
+
 	//state
 	let [berryList, setBerryList ] = useState([]);
+	let [berryLoadedState, setBerryLoadedState ] = useState(true);
 	let [inBerryDetailView, setInBerryDetailView] = useState(false);
+	let { filtersState, editFilter, setFilterSet } = filtersContext
+	let { filterSet, filters } = filtersState
 
 	//call getBerries when the this component is rendered
 	useEffect( () => {
 		getBerries();
+		console.log(filters, filterSet,);
 	}, [])
+
+	useEffect(() => { console.log(filtersState)}, [...Object.values(filtersContext)])
+
+	const editFilterContext = (keyToEdit, keyToEditValue, booleanToEdit, booleanToEditValue) => {
+		console.log(filtersState, filterSet, keyToEdit, keyToEditValue, booleanToEdit, booleanToEditValue)
+		//call our context function for editing the filter
+		if(filterSet === false) setFilterSet(!filterSet)
+		editFilter(keyToEdit, keyToEditValue, booleanToEdit, booleanToEditValue)
+		//if filter has not been set at all, then set filterSet to true in our context
+		setTimeout(() => { console.log(filters, filtersState) }, 2000)
+	}
 
 	//api request to get all 64 berries
 	const getBerries = () => {
@@ -64,17 +84,34 @@ function Home() {
 			{/*main container of berries*/}
 			<Card style={berryListStyle}>
 				<Card.Body style={berryListBodyStyle}>
-					{/*use map to iterrate through the list of berries return from get berries*/}
+					{/*use map to iterate through the list of berries return from get berries*/}
 					{
 						berryList.map((berry, index) =>
 							// put each berry in a Berry component
-							<Berry key={index} berry={berry}/>
+							<Berry key={index} props={{berry: berry, berryLoaded: berryLoadedState}}/>
 						)
 					}
 				</Card.Body>
 
 				<Card.Body style={berryControlsStyle}>
-					content
+					<h5> Berry Filters </h5>
+					<Form>
+						<Form.Group>
+							<Form.Label>
+								Firmness
+							</Form.Label>
+							<Form.Control onChange={e => editFilterContext('firmness', e.target.value, 'firmnessSet', true)} as="select" size="md">
+								<option value={'soft'}>soft berries</option>
+								<option value={'very-soft'}>very-soft berries</option>
+								<option value={'hard'}>hard berries</option>
+								<option value={'super-hard'}>super-hard berries</option>
+								<option value={'very-hard'}>very-hard berries</option>
+							</Form.Control>
+						</Form.Group>
+						<Button variant={'success'}>
+							APPLY
+						</Button>
+					</Form>
 				</Card.Body>
 			</Card>
 		</>
