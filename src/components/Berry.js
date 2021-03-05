@@ -45,20 +45,20 @@ function Berry(props) {
 	let { filterSet, filters } = filtersState
 
 	useEffect(() => {
-		console.log('use effect is being called')
 		checkFilters();
-	}, [filtersContext.filtersState.filters.firmness])
+		console.log('use effect is being called', props.props.filter['firmness'] )
+	}, [props.props.filter['firmness']])
 
 	//call an api request on the berry using its name, which will give us the url, and
 	useEffect( () => {
-		console.log(filtersContext.filtersState.filters.firmnessSet, props.props.berryLoaded, props.props.berry.name)
-		// axios.get(`https://pokeapi.co/api/v2/berry/${props.berry.name}`).then(( response ) => {
-		// 	setBerryDetails(() => berryDetails = response.data );
-		// 	axios.get(response.data.item.url).then((response) => {
-		// 		setBerryEffect(response.data['effect_entries'][0]['short_effect']);
-		// 		setBerrySprite(response.data['sprites'].default);
-		// 	})
-		// }).then(() => { checkFilters(filters, filterSet) })
+		console.log(filtersContext.filtersState.filters.firmnessSet, props.props.filter, props.props.berry.name)
+		axios.get(`https://pokeapi.co/api/v2/berry/${props.props.berry.name}`).then(( response ) => {
+			setBerryDetails(() => berryDetails = response.data );
+			axios.get(response.data.item.url).then((response) => {
+				setBerryEffect(response.data['effect_entries'][0]['short_effect']);
+				setBerrySprite(response.data['sprites'].default);
+			})
+		}).then(() => { checkFilters(props.props.filter, props.props.filterSet) })
 	}, [])
 
 	const getBerryDetails = ( berryName ) => {
@@ -66,6 +66,7 @@ function Berry(props) {
 	}
 
 	const checkFilters = (filter, filterSet) => {
+		console.log('i am happening', props.props.berry.name)
 		if(filterSet === false) setShowBerry(true)
 		if(filterSet === true) {
 			if(filter.firmnessSet === true) {
@@ -80,15 +81,15 @@ function Berry(props) {
 
 	return (
 		<>
-			{ showBerry === false &&
-				<Card style={berryStyle} bg={berryColorLookUpTable[props.berry.name]}
-				      text={berryColorLookUpTable[props.berry.name] === 'light' ? 'dark' : 'white'}>
+			{ showBerry === true &&
+				<Card style={berryStyle} bg={berryColorLookUpTable[props.props.berry.name]}
+				      text={berryColorLookUpTable[props.props.berry.name] === 'light' ? 'dark' : 'white'}>
 					<Card.Body style={berryDetailsShown ? berryBodyDetailsStyle : berryBodyStyle}>
-						<Card.Title>{props.berry.name} <img src={berrySprite} href={props.berry.name}></img></Card.Title>
+						<Card.Title>{props.props.berry.name} <img src={berrySprite} href={props.props.berry.name}></img></Card.Title>
 						{berryDetailsShown
 							// if berryDetailsShown = true
 							? <div style={{height: '100%', width: '100%'}}>
-								<Button variant={berryColorLookUpTable[props.berry.name]} onClick={() => setBerryDetailsShown(false)}
+								<Button variant={berryColorLookUpTable[props.props.berry.name]} onClick={() => setBerryDetailsShown(false)}
 								        style={{color: 'white', position: 'absolute', top: '5%', right: '5%'}}>
 									X
 								</Button>
@@ -121,7 +122,7 @@ function Berry(props) {
 								{/*image*/}
 							</div>
 							//if berryDetailsShown = false
-							: <Button variant={berryColorLookUpTable[props.berry.name]} onClick={() => getBerryDetails(props.berry.name)}
+							: <Button variant={berryColorLookUpTable[props.props.berry.name]} onClick={() => getBerryDetails(props.props.berry.name)}
 							          style={{color: 'white', marginBottom: '4px', marginLeft: 'auto'}}>
 								<svg style={{width: '24px', height: '24px'}} viewBox="0 0 24 24">
 									<path fill="white"

@@ -51,24 +51,26 @@ function Home() {
 	let [berryList, setBerryList ] = useState([]);
 	let [berryLoadedState, setBerryLoadedState ] = useState(true);
 	let [inBerryDetailView, setInBerryDetailView] = useState(false);
-	let { filtersState, editFilter, setFilterSet } = filtersContext
-	let { filterSet, filters } = filtersState
+	let [filterState, setFilterState] = useState({
+		firmness: '',
+		firmnessSet: false
+	})
+	let [filterSet, setFilterSet] = useState(false)
+	// let { filtersState, editFilter, setFilterSet } = filtersContext
+	// let { filterSet, filters } = filtersState
 
 	//call getBerries when the this component is rendered
 	useEffect( () => {
 		getBerries();
-		console.log(filters, filterSet,);
 	}, [])
 
-	useEffect(() => { console.log(filtersState)}, [...Object.values(filtersContext)])
-
 	const editFilterContext = (keyToEdit, keyToEditValue, booleanToEdit, booleanToEditValue) => {
-		console.log(filtersState, filterSet, keyToEdit, keyToEditValue, booleanToEdit, booleanToEditValue)
-		//call our context function for editing the filter
-		if(filterSet === false) setFilterSet(!filterSet)
-		editFilter(keyToEdit, keyToEditValue, booleanToEdit, booleanToEditValue)
-		//if filter has not been set at all, then set filterSet to true in our context
-		setTimeout(() => { console.log(filters, filtersState) }, 2000)
+		if(filterSet === false) setFilterSet(true);
+		setFilterState(Object.assign(filterState, {
+			[keyToEdit]: keyToEditValue,
+			[booleanToEdit]: booleanToEditValue
+		}))
+		console.log(filterState, filterSet)
 	}
 
 	//api request to get all 64 berries
@@ -88,7 +90,7 @@ function Home() {
 					{
 						berryList.map((berry, index) =>
 							// put each berry in a Berry component
-							<Berry key={index} props={{berry: berry, berryLoaded: berryLoadedState}}/>
+							<Berry key={index} props={{berry: berry, filter: filterState, filterSet: filterSet}}/>
 						)
 					}
 				</Card.Body>
