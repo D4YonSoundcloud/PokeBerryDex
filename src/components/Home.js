@@ -53,24 +53,72 @@ function Home() {
 	let [inBerryDetailView, setInBerryDetailView] = useState(false);
 	let [filterState, setFilterState] = useState({
 		firmness: '',
-		firmnessSet: false
+		firmnessSet: false,
+		growth: undefined,
+		growthSet: false,
+		growthUnderOver: 'under',
 	})
 	let [filterSet, setFilterSet] = useState(false)
-	// let { filtersState, editFilter, setFilterSet } = filtersContext
-	// let { filterSet, filters } = filtersState
+	let [berryListener, setBerryListener] = useState(false)
+	let [growthUnderOverState, setGrowthOverUnderState] = useState('under')
+	let [growthRateOptions, setGrowthRateOptions] = useState([5,10,15,30])
+	let [selectedGrowthRate, setSelectedGrowthRate] = useState(undefined)
 
 	//call getBerries when the this component is rendered
 	useEffect( () => {
 		getBerries();
 	}, [])
 
-	const editFilterContext = (keyToEdit, keyToEditValue, booleanToEdit, booleanToEditValue) => {
+	const editFilterContext = (keyToEdit, keyToEditValue, booleanToEdit, booleanToEditValue, extraKey, extraKeyToEdit, extraKeyToEditValue) => {
+		console.log(keyToEdit, keyToEditValue, booleanToEdit, booleanToEditValue, extraKey, extraKeyToEdit, extraKeyToEditValue)
 		if(filterSet === false) setFilterSet(true);
+		if(extraKey === false) {
+			setFilterState(Object.assign(filterState, {
+				[keyToEdit]: keyToEditValue,
+				[booleanToEdit]: booleanToEditValue
+			}))
+		} else {
+			if(keyToEdit === 'growth') setSelectedGrowthRate(keyToEditValue)
+			if(filterState.firmness === '') {
+				setFilterState(Object.assign(filterState, {
+					firmness: 'soft',
+					firmnessSet: true,
+					[keyToEdit]: keyToEditValue,
+					[booleanToEdit]: booleanToEditValue,
+					[extraKeyToEdit]: extraKeyToEditValue,
+				}))
+			} else {
+				setFilterState(Object.assign(filterState, {
+					[keyToEdit]: keyToEditValue,
+					[booleanToEdit]: booleanToEditValue,
+					[extraKeyToEdit]: extraKeyToEditValue,
+				}))
+			}
+		}
+		setBerryListener(!berryListener);
+	}
+
+	const resetFilter = () => {
+		setFilterSet(false);
 		setFilterState(Object.assign(filterState, {
-			[keyToEdit]: keyToEditValue,
-			[booleanToEdit]: booleanToEditValue
+			firmness: '',
+			firmnessSet: false,
+			growth: undefined,
+			growthSet: false,
+			growthUnderOver: 'under',
 		}))
-		console.log(filterState, filterSet)
+		setBerryListener(!berryListener);
+	}
+
+	const setGrowthUnderOver = () => {
+		if(growthUnderOverState === 'over') {
+			setGrowthOverUnderState(growthUnderOverState = 'under')
+		} else if(growthUnderOverState === 'under') {
+			setGrowthOverUnderState(growthUnderOverState = 'over')
+		}
+		setTimeout(() => {
+			editFilterContext('growth', selectedGrowthRate, 'growthSet', true, true, 'growthUnderOver', growthUnderOverState)
+		},100)
 	}
 
 	//api request to get all 64 berries
@@ -90,7 +138,7 @@ function Home() {
 					{
 						berryList.map((berry, index) =>
 							// put each berry in a Berry component
-							<Berry key={index} props={{berry: berry, filter: filterState, filterSet: filterSet}}/>
+							<Berry key={index} props={{berry: berry, filter: filterState, filterSet: filterSet, berryListener: berryListener}}/>
 						)
 					}
 				</Card.Body>
@@ -110,8 +158,22 @@ function Home() {
 								<option value={'very-hard'}>very-hard berries</option>
 							</Form.Control>
 						</Form.Group>
-						<Button variant={'success'}>
-							APPLY
+						<Form.Group>
+							<Form.Label>
+								Growth Time { growthUnderOverState === 'over' ? ' (under)' : ' (over)'}
+							</Form.Label>
+							<Form.Control onChange={e => editFilterContext('growth', e.target.value, 'growthSet', true, true, 'growthUnderOver', growthUnderOverState)} as="select" size="md">
+								<option value={growthRateOptions[0]}>5</option>
+								<option value={growthRateOptions[1]}>10</option>
+								<option value={growthRateOptions[2]}>15</option>
+								<option value={growthRateOptions[3]}>30</option>
+							</Form.Control>
+							<Button variant={'primary'} onClick={() => setGrowthUnderOver()} style={{marginTop: '8px'}}>
+								{growthUnderOverState}
+							</Button>
+						</Form.Group>
+						<Button variant={'success'} onClick={() => resetFilter()}>
+							CLEAR FILTERS
 						</Button>
 					</Form>
 				</Card.Body>

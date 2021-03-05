@@ -33,7 +33,6 @@ const berryBodyDetailsStyle = {
 
 
 function Berry(props) {
-	const filtersContext = useContext(FiltersContext)
 
 	//state
 	let [berryDetails, setBerryDetails] = useState([]);
@@ -41,42 +40,77 @@ function Berry(props) {
 	let [berrySprite, setBerrySprite] = useState('');
 	let [berryDetailsShown, setBerryDetailsShown] = useState(false)
 	let [showBerry, setShowBerry] = useState(true)
-	let { filtersState, editFilter, setFilterSet } = filtersContext
-	let { filterSet, filters } = filtersState
 
 	useEffect(() => {
 		checkFilters();
-		console.log('use effect is being called', props.props.filter['firmness'] )
-	}, [props.props.filter['firmness']])
+	}, [props.props.berryListener])
 
 	//call an api request on the berry using its name, which will give us the url, and
 	useEffect( () => {
-		console.log(filtersContext.filtersState.filters.firmnessSet, props.props.filter, props.props.berry.name)
 		axios.get(`https://pokeapi.co/api/v2/berry/${props.props.berry.name}`).then(( response ) => {
 			setBerryDetails(() => berryDetails = response.data );
 			axios.get(response.data.item.url).then((response) => {
 				setBerryEffect(response.data['effect_entries'][0]['short_effect']);
 				setBerrySprite(response.data['sprites'].default);
 			})
-		}).then(() => { checkFilters(props.props.filter, props.props.filterSet) })
+		}).then(() => {
+			checkFilters(props.props.filter, props.props.filterSet) })
 	}, [])
 
 	const getBerryDetails = ( berryName ) => {
 		setBerryDetailsShown(true);
 	}
 
-	const checkFilters = (filter, filterSet) => {
-		console.log('i am happening', props.props.berry.name)
-		if(filterSet === false) setShowBerry(true)
-		if(filterSet === true) {
-			if(filter.firmnessSet === true) {
-				if(berryDetails.firmness.name === filter.firmness) {
+	const checkFilters = (firmnessTrue, growthTrue) => {
+		console.log(props.props.filter['growth'], berryDetails['growth_time'], props.props.filter['growthUnderOver'],)
+		if(props.props.filterSet === false) setShowBerry(true)
+		if(props.props.filterSet === true) {
+			//only run once to check if berryName is a match, then recursively call again to check if growth is set
+			if(props.props.filter['firmnessSet'] === true && firmnessTrue !== true) {
+				if(berryDetails.firmness.name === props.props.filter['firmness']) {
 					setShowBerry(true)
+					return checkFilters(true, false)
 				} else {
 					setShowBerry(false)
 				}
 			}
+			if(props.props.filter['growthSet'] === true && growthTrue !== true) {
+				if(props.props.filter['growthUnderOver'] === 'under') {
+					if(berryDetails['growth_time'] <= parseFloat(props.props.filter['growth'])) {
+						setShowBerry(true)
+						if(props.props.filter['firmnessSet'] === false){
+							return checkFilters(true, true)
+						}
+						return checkFilters(firmnessTrue, true)
+					} else {
+						setShowBerry(false)
+					}
+				} else if (props.props.filter['growthUnderOver'] === 'over') {
+					if(berryDetails['growth_time'] >= parseFloat(props.props.filter['growth'])) {
+						setShowBerry(true)
+						if(props.props.filter['firmnessSet'] === false){
+							return checkFilters(true, true)
+						}
+						return checkFilters(firmnessTrue, true)
+					} else {
+						setShowBerry(false)
+					}
+				}
+			}
+			if(props.props.filter['firmnessSet'] === true && firmnessTrue === true){
+				if(props.props.filter['growthSet'] === true && growthTrue === true) {
+					return setShowBerry(true)
+				} else if (props.props.filter['growthSet'] !== true) {
+					return setShowBerry(true)
+				} else {
+					//setting showBerry to false;
+					return setShowBerry(false)
+				}
+			} else {
+				setShowBerry(false)
+			}
 		}
+		console.log(showBerry)
 	}
 
 	return (
@@ -85,7 +119,8 @@ function Berry(props) {
 				<Card style={berryStyle} bg={berryColorLookUpTable[props.props.berry.name]}
 				      text={berryColorLookUpTable[props.props.berry.name] === 'light' ? 'dark' : 'white'}>
 					<Card.Body style={berryDetailsShown ? berryBodyDetailsStyle : berryBodyStyle}>
-						<Card.Title>{props.props.berry.name} <img src={berrySprite} href={props.props.berry.name}></img></Card.Title>
+						{/*title of the berry plus the berry sprite (src url gotten from berrySprite state)*/}
+						<Card.Title>{props.props.berry.name} <img src={berrySprite}/></Card.Title>
 						{berryDetailsShown
 							// if berryDetailsShown = true
 							? <div style={{height: '100%', width: '100%'}}>
