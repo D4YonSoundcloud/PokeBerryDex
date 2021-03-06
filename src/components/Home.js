@@ -160,7 +160,7 @@ function Home() {
 						</Form.Group>
 						<Form.Group>
 							<Form.Label>
-								Growth Time { growthUnderOverState === 'over' ? ' (under)' : ' (over)'}
+								Growth Time
 							</Form.Label>
 							<Form.Control onChange={e => editFilterContext('growth', e.target.value, 'growthSet', true, true, 'growthUnderOver', growthUnderOverState)} as="select" size="md">
 								<option value={growthRateOptions[0]}>5</option>
