@@ -9,26 +9,32 @@ import FiltersContext from "../context/filtersContext";
 const berryStyle = {
 	display: 'flex',
 	flexFlow: 'row',
-	width: '14rem',
+	width: '14.25rem',
 	marginLeft: '0.5rem',
 	marginRight: '0.5rem',
 	marginBottom: '1rem',
+	height: '5rem',
+	cursor: 'pointer',
 }
-const berryStyleFocues = {
+const berryStyleFocus = {
 	display: 'flex',
 	flexFlow: 'row',
-	width: '14rem',
+	width: '14.25rem',
 	marginLeft: '0.5rem',
 	marginRight: '0.5rem',
 	marginBottom: '1rem',
+	height: '29rem',
+	cursor: 'pointer',
 }
 const berryBodyStyle = {
 	display: 'flex',
 	flexFlow: 'row',
+	cursor: 'pointer',
 }
 const berryBodyDetailsStyle = {
 	display: 'flex',
 	flexFlow: 'column',
+	cursor: 'pointer',
 }
 
 
@@ -57,9 +63,13 @@ function Berry(props) {
 			checkFilters(props.props.filter, props.props.filterSet) })
 	}, [])
 
-	const getBerryDetails = ( berryName ) => {
-		setBerryDetailsShown(true);
-	}
+	useEffect(() => {
+		if(props.props.showAllDetails === true) {
+			setBerryDetailsShown(true);
+		} else {
+			setBerryDetailsShown(false);
+		}
+	}, [props.props.showAllDetails])
 
 	const checkFilters = (firmnessTrue, growthTrue) => {
 		console.log(props.props.filter['growth'], berryDetails['growth_time'], props.props.filter['growthUnderOver'],)
@@ -113,21 +123,25 @@ function Berry(props) {
 		console.log(showBerry)
 	}
 
+	const toggleBerryDetails = () => {
+		if(berryDetailsShown === true) {
+			setBerryDetailsShown(false)
+		} else {
+			setBerryDetailsShown(true)
+		}
+	}
+
 	return (
 		<>
 			{ showBerry === true &&
-				<Card style={berryStyle} bg={berryColorLookUpTable[props.props.berry.name]}
+				<Card style={berryDetailsShown ? berryStyleFocus : berryStyle} bg={berryColorLookUpTable[props.props.berry.name]} onClick={() => toggleBerryDetails()}
 				      text={berryColorLookUpTable[props.props.berry.name] === 'light' ? 'dark' : 'white'}>
 					<Card.Body style={berryDetailsShown ? berryBodyDetailsStyle : berryBodyStyle}>
 						{/*title of the berry plus the berry sprite (src url gotten from berrySprite state)*/}
-						<Card.Title>{props.props.berry.name} <img src={berrySprite}/></Card.Title>
+						<Card.Title onClick={() => toggleBerryDetails()}>{props.props.berry.name} <img src={berrySprite}/></Card.Title>
 						{berryDetailsShown
 							// if berryDetailsShown = true
-							? <div style={{height: '100%', width: '100%'}}>
-								<Button variant={berryColorLookUpTable[props.props.berry.name]} onClick={() => setBerryDetailsShown(false)}
-								        style={{color: 'white', position: 'absolute', top: '5%', right: '5%'}}>
-									X
-								</Button>
+							? <div onClick={() => toggleBerryDetails()} style={{height: '100%', width: '100%'}}>
 								{/*firmness*/}
 								<div style={{width: '100%'}}> Firmness: {' ' + berryDetails.firmness.name}</div>
 								{/*flavors*/}
@@ -157,7 +171,7 @@ function Berry(props) {
 								{/*image*/}
 							</div>
 							//if berryDetailsShown = false
-							: <Button variant={berryColorLookUpTable[props.props.berry.name]} onClick={() => getBerryDetails(props.props.berry.name)}
+							: <Button variant={berryColorLookUpTable[props.props.berry.name]} onClick={() => toggleBerryDetails()}
 							          style={{color: 'white', marginBottom: '4px', marginLeft: 'auto'}}>
 								<svg style={{width: '24px', height: '24px'}} viewBox="0 0 24 24">
 									<path fill="white"

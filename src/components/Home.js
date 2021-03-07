@@ -18,7 +18,7 @@ const berryListStyle = {
 const berryListBodyStyle = {
 	display: 'flex',
 	flexFlow: 'row wrap',
-	alignItems: 'start',
+	alignContent: 'flex-start',
 	width: '60%',
 	height: '100%',
 	marginRight: '0.5%',
@@ -38,7 +38,7 @@ const berryListBodyStyleOverlay = {
 const berryControlsStyle = {
 	display: 'flex',
 	flexFlow: 'column',
-	alignItems: 'start',
+	alignItems: 'center',
 	width: '15%',
 	height: '100%',
 }
@@ -63,6 +63,7 @@ function Home() {
 	let [growthUnderOverState, setGrowthOverUnderState] = useState('under')
 	let [growthRateOptions, setGrowthRateOptions] = useState([5,10,15,30])
 	let [selectedGrowthRate, setSelectedGrowthRate] = useState(undefined)
+	let [showAllDetail, setShowAllDetail] = useState(false)
 
 	//call getBerries when the this component is rendered
 	useEffect( () => {
@@ -108,6 +109,7 @@ function Home() {
 			growthUnderOver: 'under',
 		}))
 		setBerryListener(!berryListener);
+		setShowAllDetail(false);
 	}
 
 	const setGrowthUnderOver = () => {
@@ -138,15 +140,15 @@ function Home() {
 					{
 						berryList.map((berry, index) =>
 							// put each berry in a Berry component
-							<Berry key={index} props={{berry: berry, filter: filterState, filterSet: filterSet, berryListener: berryListener}}/>
+							<Berry key={index} props={{berry: berry, filter: filterState, filterSet: filterSet, berryListener: berryListener, showAllDetails: showAllDetail}}/>
 						)
 					}
 				</Card.Body>
 
 				<Card.Body style={berryControlsStyle}>
 					<h5> Berry Filters </h5>
-					<Form>
-						<Form.Group>
+					<Form style={{display: 'flex', flexFlow: 'column', width: '100%', alignItems: 'center'}}>
+						<Form.Group style={{display: 'flex', flexFlow: 'column', width: '80%'}}>
 							<Form.Label>
 								Firmness
 							</Form.Label>
@@ -158,7 +160,7 @@ function Home() {
 								<option value={'very-hard'}>very-hard berries</option>
 							</Form.Control>
 						</Form.Group>
-						<Form.Group>
+						<Form.Group style={{display: 'flex', flexFlow: 'column', width: '80%'}}>
 							<Form.Label>
 								Growth Time
 							</Form.Label>
@@ -172,9 +174,19 @@ function Home() {
 								{growthUnderOverState}
 							</Button>
 						</Form.Group>
-						<Button variant={'success'} onClick={() => resetFilter()}>
-							CLEAR FILTERS
-						</Button>
+						<Form.Group style={{display: 'flex', flexFlow: 'column', width: '80%'}}>
+							<Form.Label>
+								Details:
+							</Form.Label>
+							<Button variant={showAllDetail ? 'danger' : 'primary'} onClick={() => setShowAllDetail(!showAllDetail)}>
+								{showAllDetail ? 'Hide All' : 'Show All'}
+							</Button>
+						</Form.Group>
+						<Form.Group style={{display: 'flex', flexFlow: 'column', width: '80%'}}>
+							<Button variant={'success'} onClick={() => resetFilter()}>
+								Clear Filters
+							</Button>
+						</Form.Group>
 					</Form>
 				</Card.Body>
 			</Card>
