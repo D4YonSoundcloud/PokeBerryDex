@@ -14,6 +14,7 @@ const berryListStyle = {
 	overflowY: 'scroll',
 	width: '75vw',
 	height: '75vh',
+	marginBottom: '12px',
 }
 const berryListBodyStyle = {
 	display: 'flex',
