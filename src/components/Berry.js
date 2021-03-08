@@ -46,6 +46,7 @@ function Berry(props) {
 	let [berrySprite, setBerrySprite] = useState('');
 	let [berryDetailsShown, setBerryDetailsShown] = useState(false)
 	let [showBerry, setShowBerry] = useState(true)
+	let [detailsLoaded, setDetailsLoaded] = useState(false)
 
 	//runs every-time there is a change to the filters list
 	useEffect(() => {
@@ -63,6 +64,7 @@ function Berry(props) {
 				setBerrySprite(response.data['sprites'].default);
 			})
 		}).then(() => {
+			setDetailsLoaded(true)
 			checkFilters(props.props.filter, props.props.filterSet) })
 	}, [])
 
@@ -196,7 +198,16 @@ function Berry(props) {
 				      text={berryColorLookUpTable[props.props.berry.name] === 'light' ? 'dark' : 'white'}>
 					<Card.Body style={berryDetailsShown ? berryBodyDetailsStyle : berryBodyStyle}>
 						{/*title of the berry plus the berry sprite (src url gotten from berrySprite state)*/}
-						<Card.Title onClick={() => toggleBerryDetails()}>{props.props.berry.name} <img src={berrySprite}/></Card.Title>
+						<Card.Title onClick={() => toggleBerryDetails()}>
+							{props.props.berry.name}
+							<img style={{marginLeft: '4px'}} src={berrySprite}/>
+						</Card.Title>
+						{/*div for displaying natural gift type*/}
+						{
+							detailsLoaded === true && <div style={{height: (berryDetailsShown ? '5%' : '50%'), width: '10%', marginTop: '5px', marginLeft: '4px', marginBottom: '2px',
+								transformOrigin: 'center', transform: 'scale(0.5)', borderRadius: '50%', background: berryNaturalGiftTypeLookUpTable[berryDetails['natural_gift_type'].name] }}>
+							</div>
+						}
 						{berryDetailsShown
 							// if berryDetailsShown = true
 							? <div onClick={() => toggleBerryDetails()} style={{height: '100%', width: '100%'}}>
@@ -245,6 +256,25 @@ function Berry(props) {
 }
 
 export default Berry
+
+let berryNaturalGiftTypeLookUpTable = {
+	'fire': 'rgb(255,119,0)',
+	'water': 'rgb(0,153,255)',
+	'electric': 'rgb(255,230,0)',
+	'grass': 'rgb(24,208,36)',
+	'ice': 'rgb(172,248,219)',
+	'fighting': 'rgb(255,0,0)',
+	'poison': 'rgb(189,0,255)',
+	'ground': 'rgb(180,135,46)',
+	'flying': 'rgb(236,245,239)',
+	'psychic': 'rgb(255,0,245)',
+	'bug': 'rgb(63,76,0)',
+	'rock': 'rgb(198,124,30)',
+	'ghost': 'rgb(53,38,99)',
+	'dragon': 'rgb(57,6,151)',
+	'dark': 'rgb(54,54,54)',
+	'steel': 'rgb(146,146,146)',
+}
 
 let berryColorLookUpTable = {
 	'cheri': 'danger',
