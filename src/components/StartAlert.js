@@ -42,7 +42,7 @@ function StartInfo() {
 					:
 				<div style={infoContainerStyle}>
 					<Button className="mb-2" style={{marginLeft: '1.25%'}} onClick={() => setShow(true)}>Show Info</Button>
-					<p>Created By <strong style={linkStyle} onClick={() => window.location.href = 'https://www.mattdayweb.dev'}>Matt Day</strong></p>
+					<p style={{marginRight: '1.25%'}}>Created By <strong style={linkStyle} onClick={() => window.location.href = 'https://www.mattdayweb.dev'}>Matt Day</strong></p>
 				</div>
 			}
 		</>
