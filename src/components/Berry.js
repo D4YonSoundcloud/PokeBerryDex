@@ -47,11 +47,14 @@ function Berry(props) {
 	let [berryDetailsShown, setBerryDetailsShown] = useState(false)
 	let [showBerry, setShowBerry] = useState(true)
 
+	//runs every-time there is a change to the filters list
 	useEffect(() => {
 		checkFilters();
 	}, [props.props.berryListener])
 
-	//call an api request on the berry using its name, which will give us the url, and
+	//created(), runs the first time the component is rendered
+	//call an api request on each berry using its name, along with its item url, using the item url, we can then find the effect
+	//of the berry, and the url of the sprite for it, letting us get the sprite next to the name of the berry!
 	useEffect( () => {
 		axios.get(`https://pokeapi.co/api/v2/berry/${props.props.berry.name}`).then(( response ) => {
 			setBerryDetails(() => berryDetails = response.data );
@@ -63,6 +66,7 @@ function Berry(props) {
 			checkFilters(props.props.filter, props.props.filterSet) })
 	}, [])
 
+	//watcher for if showAllDetails is changed in Home.js, will show set the details to either true or false
 	useEffect(() => {
 		if(props.props.showAllDetails === true) {
 			setBerryDetailsShown(true);
@@ -71,58 +75,112 @@ function Berry(props) {
 		}
 	}, [props.props.showAllDetails])
 
-	const checkFilters = (firmnessTrue, growthTrue) => {
-		console.log(props.props.filter['growth'], berryDetails['growth_time'], props.props.filter['growthUnderOver'],)
-		if(props.props.filterSet === false) setShowBerry(true)
-		if(props.props.filterSet === true) {
-			//only run once to check if berryName is a match, then recursively call again to check if growth is set
-			if(props.props.filter['firmnessSet'] === true && firmnessTrue !== true) {
-				if(berryDetails.firmness.name === props.props.filter['firmness']) {
+	//first time writing a somewhat complex filter algorithm, so I'm assuming there are improvements that could be made
+	//decides to go with a recursive function that will call itself if a filter condition is met, until there are none left that match,
+	//or there was none in the first place
+	const checkFilters = (firmnessTrue, growthTrue, naturalGiftTrue) => {
+		console.log(props.props.filter['growth'], berryDetails['growth_time'], props.props.filter,)
+
+		//grab what we need from the props, and set them equal to local variables, so we don't have to read down the props object each
+		//time we want to compare them
+		let filterSet = props.props.filterSet;
+		let firmnessSet = props.props.filter['firmnessSet'];
+		let filterFirmnessString = props.props.filter['firmness'];
+		let growthSet = props.props.filter['growthSet'];
+		let growthUnderOver = props.props.filter['growthUnderOver'];
+		let filterGrowthValue = props.props.filter['growth'];
+		let naturalGiftType = props.props.filter['naturalGift'];
+		let naturalGiftSet = props.props.filter['naturalGiftSet'];
+
+		if(filterSet === false) setShowBerry(true)
+
+		if(filterSet === true) {
+			//only run once to check if berryName is a match, then recursively call again to check if more filters match
+			if(firmnessSet === true && firmnessTrue !== true) {
+				//recursive condition
+				if(berryDetails.firmness.name === filterFirmnessString) {
 					setShowBerry(true)
-					return checkFilters(true, false)
+					console.log('i have been called first loop')
+					return checkFilters(true, false, false)
 				} else {
 					setShowBerry(false)
 				}
 			}
-			if(props.props.filter['growthSet'] === true && growthTrue !== true) {
-				if(props.props.filter['growthUnderOver'] === 'under') {
-					if(berryDetails['growth_time'] <= parseFloat(props.props.filter['growth'])) {
+			if(growthSet === true && growthTrue !== true) {
+				//recursive condition
+				if(growthUnderOver === 'under') {
+					if(berryDetails['growth_time'] <= parseFloat(filterGrowthValue)) {
 						setShowBerry(true)
-						if(props.props.filter['firmnessSet'] === false){
-							return checkFilters(true, true)
+						//if firmness is set to false, but there is growth time, then recursively call this, passing true for the firmness
+						if(firmnessSet === false){
+							return checkFilters(true, true, false)
 						}
-						return checkFilters(firmnessTrue, true)
+						return checkFilters(firmnessTrue, true, naturalGiftTrue)
 					} else {
 						setShowBerry(false)
 					}
-				} else if (props.props.filter['growthUnderOver'] === 'over') {
-					if(berryDetails['growth_time'] >= parseFloat(props.props.filter['growth'])) {
+				} else if (growthUnderOver === 'over') {
+					if(berryDetails['growth_time'] >= parseFloat(filterGrowthValue)) {
 						setShowBerry(true)
-						if(props.props.filter['firmnessSet'] === false){
-							return checkFilters(true, true)
+						if(firmnessSet === false){
+							return checkFilters(true, true, false)
 						}
-						return checkFilters(firmnessTrue, true)
+						return checkFilters(firmnessTrue, true, naturalGiftTrue)
 					} else {
 						setShowBerry(false)
 					}
 				}
 			}
-			if(props.props.filter['firmnessSet'] === true && firmnessTrue === true){
-				if(props.props.filter['growthSet'] === true && growthTrue === true) {
-					return setShowBerry(true)
-				} else if (props.props.filter['growthSet'] !== true) {
-					return setShowBerry(true)
+			if(naturalGiftSet === true && naturalGiftTrue !== true) {
+				//recursive condition
+				if(berryDetails['natural_gift_type'].name === naturalGiftType) {
+					setShowBerry(true)
+					return checkFilters(firmnessTrue, growthTrue, true)
 				} else {
-					//setting showBerry to false;
-					return setShowBerry(false)
+					setShowBerry(false)
 				}
+			}
+
+			//if statement at the end of the function, checks if it has been recursively called
+			if(firmnessSet === true && firmnessTrue === true){
+				if(growthSet !== true && naturalGiftSet !== true) {
+					console.log('i have been called in the final if')
+					return setShowBerry(true);
+				}
+				finalCheck(growthSet, growthTrue, naturalGiftSet, naturalGiftTrue)
 			} else {
-				setShowBerry(false)
+				if((growthSet !== true && naturalGiftSet !== true) || firmnessSet === true) {
+					return setShowBerry(false);
+				}
+				finalCheck(growthSet, growthTrue, naturalGiftSet, naturalGiftTrue);
 			}
 		}
-		console.log(showBerry)
 	}
 
+	//final check function for our checkFilters function
+	const finalCheck = (growthSetBool, growthLoopBool, naturalGiftSetBool, naturalGiftLoopBool) => {
+		if(growthSetBool === true && growthLoopBool === true) {
+			if(naturalGiftSetBool === true && naturalGiftLoopBool === true){
+				return setShowBerry
+			} else if (naturalGiftSetBool !== true) {
+				return setShowBerry(true)
+			} else {
+				return setShowBerry(false)
+			}
+		} else if (growthSetBool !== true) {
+			if(naturalGiftSetBool === true && naturalGiftLoopBool === true){
+				return setShowBerry
+			} else if (naturalGiftSetBool !== true) {
+				return setShowBerry(true)
+			} else {
+				return setShowBerry(false)
+			}
+		} else {
+			return setShowBerry(false)
+		}
+	}
+
+	//toggles the berry details
 	const toggleBerryDetails = () => {
 		if(berryDetailsShown === true) {
 			setBerryDetailsShown(false)
